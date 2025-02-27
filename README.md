@@ -88,17 +88,3 @@ Após iniciar a API, use os seguintes endpoints para obter recomendações:
    ```
    http://127.0.0.1:8000/results?redis_build_model_job_id={model}&redis_get_user_data_job_id={user}
    ```
-
-## Frontend
-
-1. Acesse o diretório `/frontend`
-2. Instale as dependências:
-   ```
-   npm install
-   ```
-3. Para iniciar o frontend, execute:
-   ```
-   npx next build
-   npx next start
-   ```
-4. O frontend estará disponível em `http://localhost:3000`
