@@ -17,7 +17,7 @@ from rq.registry import FinishedJobRegistry
 from scraping.get_user_ratings import get_user_data
 from model.build_model import build_model
 from model.run_model import run_model
-from worker import conn
+from api.worker import conn
 
 
 def get_previous_job_from_registry(index=-1):
