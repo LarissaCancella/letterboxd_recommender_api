@@ -11,5 +11,13 @@
         "src": "/(.*)",
         "dest": "main.py"
       }
-    ]
+    ],
+    "functions": {
+      "main.py": {
+        "maxDuration": 60
+      }
+    },
+    "env": {
+      "PYTHON_VERSION": "3.11.0"
+    }
   }
