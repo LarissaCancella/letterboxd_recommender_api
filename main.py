@@ -13,13 +13,12 @@ from rq.registry import DeferredJobRegistry
 from worker import conn
 from jobs.handle_recs import get_client_user_data, build_client_model
 
-# Definir constantes
-#REDIRECT_URL = "https://letterboxd-recommender-app.com"
 ORIGINS = [
     "http://localhost",
     "https://localhost",
     "http://localhost:3000",
     "https://localhost:3000",
+    "https://letterboxd-recommender-web.vercel.app/"
 ]
 
 app = FastAPI()
@@ -33,19 +32,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configurações de arquivos estáticos e templates
-#app.mount("/static", StaticFiles(directory="static"), name="static")
-#templates = Jinja2Templates(directory="templates")
-
 # Filas Redis e thresholds
 queue_pool = [Queue(channel, connection=conn) for channel in ["high", "default", "low"]]
 popularity_thresholds_500k_samples = [2500, 2000, 1500, 1000, 700, 400, 250, 150]
 
-
-#@app.get("/", response_class=HTMLResponse)
-#def homepage():
-    # Redirecionar para URL principal
-    #return RedirectResponse(REDIRECT_URL)
 
 class RecommendationRequest(BaseModel):
     username: str
