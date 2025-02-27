@@ -1,0 +1,7 @@
+/venv
+.code-workspace
+.env
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
