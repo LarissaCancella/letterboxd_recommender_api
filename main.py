@@ -10,12 +10,12 @@ load_dotenv()
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
 
-def start_worker():
-    os.system("python worker.py")
+#def start_worker():
+#    os.system("python worker.py")
 
 # Inicia o worker em um thread separado
-worker_thread = threading.Thread(target=start_worker)
-worker_thread.start()
+#worker_thread = threading.Thread(target=start_worker)
+#worker_thread.start()
 
 from fastapi import FastAPI, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
