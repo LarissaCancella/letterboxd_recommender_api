@@ -63,7 +63,7 @@ class RecommendationRequest(BaseModel):
     data_opt_in: bool
 
 @app.get("/")
-async def root():
+def root():
     return {"message": "Hello from FastAPI!"}
 
 @app.get("/get_recs")
@@ -153,5 +153,5 @@ def get_results(redis_build_model_job_id: str, redis_get_user_data_job_id: str):
             content={"statuses": job_statuses, "execution_data": execution_data},
         )
 
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+#if __name__ == "__main__":
+#    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
