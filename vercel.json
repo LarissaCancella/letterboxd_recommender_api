@@ -1,17 +1,15 @@
 {
-    "version": 2,
-    "functions": {
-      "api/**/*.py": {
-        "runtime": "python3.11"
-      }
-    },
-    "routes": [
-      {
-        "src": "/(.*)",
-        "dest": "/api/main.py"
-      }
-    ],
-    "env": {
-      "PYTHON_VERSION": "3.11.0"
+  "version": 2,
+  "builds": [
+    {
+      "src": "main.py",
+      "use": "@vercel/python"
     }
-  }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "main.py"
+    }
+  ]
+}
