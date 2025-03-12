@@ -1,8 +1,13 @@
+import sys
 import threading
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Adiciona o diretório raiz do projeto ao Python Path
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(project_root)
 
 def start_worker():
     os.system("python worker.py")
