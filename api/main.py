@@ -4,12 +4,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def start_worker():
-    os.system("python worker.py")
+#def start_worker():
+#    os.system("python worker.py")
 
 # Inicia o worker em um thread separado
-worker_thread = threading.Thread(target=start_worker)
-worker_thread.start()
+#worker_thread = threading.Thread(target=start_worker)
+#worker_thread.start()
 
 from fastapi import FastAPI, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
