@@ -62,6 +62,9 @@ class RecommendationRequest(BaseModel):
     popularity_filter: int
     data_opt_in: bool
 
+@app.get("/")
+async def root():
+    return {"message": "Hello from FastAPI!"}
 
 @app.get("/get_recs")
 def get_recs(username: str, training_data_size: int, popularity_filter: int, data_opt_in: bool):
