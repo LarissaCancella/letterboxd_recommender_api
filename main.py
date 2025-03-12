@@ -10,12 +10,12 @@ load_dotenv()
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
 
-#def start_worker():
-#    os.system("python worker.py")
+def start_worker():
+    os.system("python worker.py")
 
 # Inicia o worker em um thread separado
-#worker_thread = threading.Thread(target=start_worker)
-#worker_thread.start()
+worker_thread = threading.Thread(target=start_worker)
+worker_thread.start()
 
 from fastapi import FastAPI, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
@@ -63,7 +63,7 @@ class RecommendationRequest(BaseModel):
     data_opt_in: bool
 
 @app.get("/")
-def root():
+async def root():
     return {"message": "Hello from FastAPI!"}
 
 @app.get("/get_recs")
@@ -153,5 +153,5 @@ def get_results(redis_build_model_job_id: str, redis_get_user_data_job_id: str):
             content={"statuses": job_statuses, "execution_data": execution_data},
         )
 
-#if __name__ == "__main__":
-#    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
