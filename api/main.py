@@ -1,3 +1,4 @@
+import uvicorn
 import sys
 import threading
 import os
@@ -148,3 +149,6 @@ def get_results(redis_build_model_job_id: str, redis_get_user_data_job_id: str):
             status_code=202,
             content={"statuses": job_statuses, "execution_data": execution_data},
         )
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
