@@ -1,29 +1,7 @@
-import uvicorn
-import sys
-import threading
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-# Adiciona o diretório raiz do projeto ao Python Path
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(project_root)
-
-def start_worker():
-    os.system("python worker.py")
-
-# Inicia o worker em um thread separado
-worker_thread = threading.Thread(target=start_worker)
-worker_thread.start()
-
-from fastapi import FastAPI, Request, status
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Union
-from urllib.parse import urlparse, urlunparse
-import pandas as pd
 from rq import Queue
 from rq.exceptions import NoSuchJobError
 from rq.job import Job
@@ -152,6 +130,3 @@ def get_results(redis_build_model_job_id: str, redis_get_user_data_job_id: str):
             status_code=202,
             content={"statuses": job_statuses, "execution_data": execution_data},
         )
-
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
