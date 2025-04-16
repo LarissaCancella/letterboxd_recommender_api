@@ -28,7 +28,7 @@ jobs:
           
       - name: Run data update scripts
         run: |
-          bash scripts/run_scripts.sh
+          bash scripts/run_database_and_model_update.sh.sh
           
       - name: Commit and push updated data
         run: |
