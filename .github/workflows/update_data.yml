@@ -28,7 +28,7 @@ jobs:
           
       - name: Run data update scripts
         run: |
-          bash scripts/run_scripts.sh
+          bash scripts/run_database_and_model_update.sh
         env:
           CONNECTION_URL: ${{ secrets.CONNECTION_URL }}
           MONGO_DB: ${{ secrets.MONGO_DB }}
