@@ -1,0 +1,50 @@
+name: Weekly Database Update
+
+on:
+  schedule:
+    # Executa uma vez por semana às segundas-feiras, às 1:00 da manhã UTC
+    - cron: '0 1 * * 1'
+  workflow_dispatch:  # Permite acionamento manual
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install pipenv
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+      
+      - name: Install dependencies
+        run: pipenv install
+          
+      - name: Run data update scripts
+        run: |
+          bash scripts/run_database_and_model_update.sh
+          
+      - name: Commit and push updated data
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/ model/
+          git commit -m "Atualização semanal automática dos dados e modelos"
+          git push
+          
+      - name: Deploy updated data to Heroku
+        uses: akhileshns/heroku-deploy@v3.12.13
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: "cinematch-api"
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          justlogin: true
+      
+      - name: Restart Heroku app to use new data
+        run: heroku restart --app cinematch-api
