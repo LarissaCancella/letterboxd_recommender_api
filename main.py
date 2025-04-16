@@ -15,8 +15,8 @@ ORIGINS = [
     "https://localhost",
     "http://localhost:3000",
     "https://localhost:3000",
-    "https://letterboxd-recommender-web.vercel.app/",
-    "https://cinematch-api-9612c756622d.herokuapp.com/"
+    "https://cinematch-api-9612c756622d.herokuapp.com/",
+    "https://cinematch.up.railway.app/"
 ]
 
 app = FastAPI()
