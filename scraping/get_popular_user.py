@@ -8,7 +8,6 @@ sys.path.append(project_root)
 from pymongo.operations import UpdateOne
 import requests
 from bs4 import BeautifulSoup
-import pymongo
 from pymongo.errors import BulkWriteError
 from pprint import pprint
 from tqdm import tqdm
