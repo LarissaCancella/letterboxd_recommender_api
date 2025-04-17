@@ -7,7 +7,7 @@ on:
   workflow_dispatch:  # Permite acionamento manual também
 
 jobs:
-  update-data:
+  get-popular-users:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -26,14 +26,97 @@ jobs:
       - name: Install dependencies
         run: pipenv install
           
-      - name: Run data update scripts
+      - name: Scraping popular users
         run: |
-          bash scripts/run_database_and_model_update.sh
+          pipenv run python ./scraping/get_popular_user.py
         env:
           CONNECTION_URL: ${{ secrets.CONNECTION_URL }}
           MONGO_DB: ${{ secrets.MONGO_DB }}
           TMDB_KEY: ${{ secrets.TMDB_KEY }}
+  
+  get-ratings:
+    needs: get-popular-users
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
           
+      - name: Install pipenv
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+      
+      - name: Install dependencies
+        run: pipenv install
+          
+      - name: Scraping ratings
+        run: |
+          pipenv run python ./scraping/get_ratings.py
+        env:
+          CONNECTION_URL: ${{ secrets.CONNECTION_URL }}
+          MONGO_DB: ${{ secrets.MONGO_DB }}
+          TMDB_KEY: ${{ secrets.TMDB_KEY }}
+  
+  get-movies:
+    needs: get-ratings
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install pipenv
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+      
+      - name: Install dependencies
+        run: pipenv install
+          
+      - name: Scraping movie data
+        run: |
+          pipenv run python ./scraping/get_movies.py
+        env:
+          CONNECTION_URL: ${{ secrets.CONNECTION_URL }}
+          MONGO_DB: ${{ secrets.MONGO_DB }}
+          TMDB_KEY: ${{ secrets.TMDB_KEY }}
+  
+  create-training-data-and-deploy:
+    needs: get-movies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install pipenv
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+      
+      - name: Install dependencies
+        run: pipenv install
+          
+      - name: Creating training data
+        run: |
+          pipenv run python ./model/create_training_data.py
+        env:
+          CONNECTION_URL: ${{ secrets.CONNECTION_URL }}
+          MONGO_DB: ${{ secrets.MONGO_DB }}
+          TMDB_KEY: ${{ secrets.TMDB_KEY }}
           
       - name: Commit and push updated data
         run: |
