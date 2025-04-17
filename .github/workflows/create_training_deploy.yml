@@ -1,0 +1,56 @@
+name: 4. Create Training Data and Deploy
+
+on:
+  repository_dispatch:
+    types: [start-create-training-data]
+  workflow_dispatch:  # Permite acionamento manual também
+
+jobs:
+  create-training-data-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install pipenv
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+      
+      - name: Install dependencies
+        run: pipenv install
+          
+      - name: Creating training data
+        run: |
+          echo "================================"
+          echo "Creating Training Data Sample..."
+          echo "================================"
+          pipenv run python ./model/create_training_data.py
+          echo "========="
+          echo "Finished!"
+          echo "========="
+        env:
+          CONNECTION_URL: ${{ secrets.CONNECTION_URL }}
+          MONGO_DB: ${{ secrets.MONGO_DB }}
+          TMDB_KEY: ${{ secrets.TMDB_KEY }}
+          
+      - name: Commit and push updated data
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/ model/
+          git commit -m "Atualização semanal automática dos dados e modelos" || echo "No changes to commit"
+          git push
+          
+      - name: Install Railway CLI
+        run: npm i -g @railway/cli
+          
+      - name: Deploy to Railway
+        run: railway up
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}

@@ -1,0 +1,46 @@
+name: 1. Get Popular Users
+
+on:
+  schedule:
+    # Executa uma vez por semana às segundas-feiras, às 1:00 da manhã UTC
+    - cron: '0 1 * * 1'
+  workflow_dispatch:  # Permite acionamento manual
+  
+jobs:
+  get-popular-users:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install pipenv
+        run: |
+          python -m pip install --upgrade pip
+          pip install pipenv
+      
+      - name: Install dependencies
+        run: pipenv install
+          
+      - name: Scraping popular users
+        run: |
+          echo "======================================================="
+          echo "Scraping popular users from site and adding to database"
+          echo "======================================================="
+          pipenv run python ./scraping/get_popular_user.py
+          echo "Finished scraping popular users from site"
+        env:
+          CONNECTION_URL: ${{ secrets.CONNECTION_URL }}
+          MONGO_DB: ${{ secrets.MONGO_DB }}
+          TMDB_KEY: ${{ secrets.TMDB_KEY }}
+      
+      # Acionar o próximo workflow
+      - name: Trigger next workflow
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.WORKFLOW_PAT }}
+          event-type: start-get-ratings
