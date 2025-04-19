@@ -30,7 +30,7 @@ jobs:
           echo "=============================="
           echo "Scraping movie data from site."
           echo "=============================="
-          pipenv run python ./scraping/get_movies.py
+          pipenv run python ./scraping/get_movies_to_update.py
           echo "Finished scraping movie data from site"
         env:
           CONNECTION_URL: ${{ secrets.CONNECTION_URL }}
