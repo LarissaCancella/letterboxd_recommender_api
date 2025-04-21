@@ -143,7 +143,7 @@ async def bulk_write_operations(collection, operations):
         if operations:
             collection.bulk_write(operations, ordered=False)
     except BulkWriteError as bwe:
-        pprint(bwe.details)
+        print(bwe.details)
 
 async def main(data_type="letterboxd"):
     db_name, client, tmdb_key = connect_to_db()
