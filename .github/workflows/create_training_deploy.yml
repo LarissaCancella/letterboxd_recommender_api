@@ -51,6 +51,7 @@ jobs:
         run: npm i -g @railway/cli
           
       - name: Deploy to Railway
-        run: railway up --service CineMatch
+        run: railway up --service=$RAILWAY_SERVICE_NAME -d
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_SERVICE_NAME: ${{ secrets.RAILWAY_SERVICE_NAME }}
