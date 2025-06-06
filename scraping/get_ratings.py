@@ -21,12 +21,16 @@ from db.db_connect import connect_to_db
 from utils import helpers
 
 async def fetch(url, session, input_data={}):
-    async with session.get(url) as response:
-        try:
-            return await response.read(), input_data
-        except Exception as e:
-            print(f"Error fetching {url}: {e}")
-            return None, None
+    try:
+        async with session.get(url) as response:
+            try:
+                return await response.read(), input_data
+            except Exception as e:
+                print(f"Error reading response for {url}: {e}")
+                return None, None
+    except Exception as e:
+        print(f"Error fetching {url}: {e}")
+        return None, None
 
 async def get_page_counts(usernames, users_cursor):
     url = "https://letterboxd.com/{}/films/"
@@ -39,16 +43,20 @@ async def get_page_counts(usernames, users_cursor):
             )
             tasks.append(task)
 
-        responses = await asyncio.gather(*tasks)
-        responses = [x for x in responses if x]
+        responses = await asyncio.gather(*tasks, return_exceptions=True)
+        # Filter out None responses and exceptions
+        responses = [x for x in responses if x is not None and not isinstance(x, Exception)]
 
         update_operations = []
         for response in responses:
+            if not response[0]:  # Skip if response content is None
+                continue
+                
             soup = BeautifulSoup(response[0], "lxml")
             try:
                 page_link = soup.findAll("li", class_="paginate-page")[-1]
                 num_pages = int(page_link.find("a").text.replace(",", ""))
-            except IndexError:
+            except (IndexError, AttributeError):
                 num_pages = 1
 
             user = users_cursor.find_one({"username": response[1]["username"]})
@@ -77,6 +85,9 @@ async def get_page_counts(usernames, users_cursor):
                 pprint(bwe.details)
 
 async def generate_ratings_operations(response, send_to_db=True, return_unrated=False):
+    if not response or not response[0]:  # Skip if response or response content is None
+        return [], []
+        
     soup = BeautifulSoup(response[0], "lxml")
     reviews = soup.findAll("li", class_="poster-container")
 
@@ -84,39 +95,43 @@ async def generate_ratings_operations(response, send_to_db=True, return_unrated=
     movie_operations = []
 
     for review in reviews:
-        movie_id = review.find("div", class_="film-poster")["data-target-link"].split("/")[-2]
-        rating = review.find("span", class_="rating")
-        
-        if rating:
-            rating_val = int(rating["class"][-1].split("-")[-1])
-        elif return_unrated:
-            rating_val = -1
-        else:
+        try:
+            movie_id = review.find("div", class_="film-poster")["data-target-link"].split("/")[-2]
+            rating = review.find("span", class_="rating")
+            
+            if rating:
+                rating_val = int(rating["class"][-1].split("-")[-1])
+            elif return_unrated:
+                rating_val = -1
+            else:
+                continue
+
+            rating_object = {
+                "movie_id": movie_id,
+                "rating_val": rating_val,
+                "user_id": response[1]["username"],
+            }
+
+            skeleton_movie_object = {"movie_id": movie_id}
+
+            if not send_to_db:
+                ratings_operations.append(rating_object)
+            else:
+                ratings_operations.append(
+                    UpdateOne(
+                        {"user_id": response[1]["username"], "movie_id": movie_id},
+                        {"$set": rating_object},
+                        upsert=True,
+                    )
+                )
+                movie_operations.append(
+                    UpdateOne(
+                        {"movie_id": movie_id}, {"$set": skeleton_movie_object}, upsert=True
+                    )
+                )
+        except (KeyError, AttributeError, IndexError) as e:
+            print(f"Error processing review: {e}")
             continue
-
-        rating_object = {
-            "movie_id": movie_id,
-            "rating_val": rating_val,
-            "user_id": response[1]["username"],
-        }
-
-        skeleton_movie_object = {"movie_id": movie_id}
-
-        if not send_to_db:
-            ratings_operations.append(rating_object)
-        else:
-            ratings_operations.append(
-                UpdateOne(
-                    {"user_id": response[1]["username"], "movie_id": movie_id},
-                    {"$set": rating_object},
-                    upsert=True,
-                )
-            )
-            movie_operations.append(
-                UpdateOne(
-                    {"movie_id": movie_id}, {"$set": skeleton_movie_object}, upsert=True
-                )
-            )
 
     return ratings_operations, movie_operations
 
@@ -129,14 +144,24 @@ async def get_user_ratings(username, db_cursor=None, mongo_db=None, store_in_db=
 
     async with ClientSession() as session:
         tasks = [asyncio.ensure_future(fetch(url.format(username, i + 1), session, {"username": username})) for i in range(num_pages)]
-        scrape_responses = await asyncio.gather(*tasks)
-        scrape_responses = [x for x in scrape_responses if x]
+        scrape_responses = await asyncio.gather(*tasks, return_exceptions=True)
+        # Filter out None responses and exceptions
+        scrape_responses = [x for x in scrape_responses if x is not None and not isinstance(x, Exception)]
+
+    if not scrape_responses:
+        print(f"No valid responses for user {username}, skipping...")
+        return [], []
 
     tasks = [asyncio.ensure_future(generate_ratings_operations(response, send_to_db=store_in_db, return_unrated=return_unrated)) for response in scrape_responses]
-    parse_responses = await asyncio.gather(*tasks)
+    parse_responses = await asyncio.gather(*tasks, return_exceptions=True)
+    # Filter out exceptions
+    parse_responses = [x for x in parse_responses if not isinstance(x, Exception)]
 
     if not store_in_db:
         return list(chain.from_iterable(list(chain.from_iterable(parse_responses))))
+
+    if not parse_responses:
+        return [], []
 
     upsert_ratings_operations, upsert_movies_operations = zip(*parse_responses)
     return list(chain.from_iterable(upsert_ratings_operations)), list(chain.from_iterable(upsert_movies_operations))
