@@ -1,9 +1,9 @@
 name: Weekly Database Update and Railway Deploy
 
 on:
-  schedule:
+  #schedule:
     # Executa uma vez por semana às segundas-feiras, às 1:00 da manhã UTC
-    - cron: '0 1 * * 1'
+    #- cron: '0 1 * * 1'
   workflow_dispatch:  # Permite acionamento manual também
 
 # Adicione esta seção para dar permissão de escrita ao token GITHUB_TOKEN
