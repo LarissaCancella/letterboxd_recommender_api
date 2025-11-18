@@ -1,90 +1,96 @@
 # LETTERBOXD RECOMMENDER APP
 
-## Configuração do Ambiente
+## Environment Setup
 
-1. Verifique a versão do Python:
-   ```
+1. **Check Python version:**
+   ```bash
    python --version
    ```
-   Certifique-se de que é 3.11.0. Se não for, instale-a.
+   Ensure it is version 3.11.0. If not, please install it.
 
-2. Crie um ambiente virtual:
+2. **Create a virtual environment:**
    ```
    python -m venv venv
    ```
 
-3. Ative o ambiente virtual:
-   - No Windows:
+3. **Activate the virtual environment:**
+   - On Windows:
      ```
      venv\Scripts\activate
      ```
-   - No macOS e Linux:
+   - On macOS and Linux:
      ```
      source venv/bin/activate
      ```
 
-4. Instale as dependências:
+4. **Install dependencies:**
    ```
    pip install -r requirements.txt
    ```
 
-   Caso ocorra erro:
-   Se você receber um erro sobre "Microsoft Visual C++ 14.0 or greater is required", instale o "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/
+   **Troubleshooting:**
+   If you encounter an error regarding "Microsoft Visual C++ 14.0 or greater is required", please install the Microsoft C++ Build Tools: https://visualstudio.microsoft.com/visual-cpp-build-tools/
 
-## Executando o Projeto
+## Running the Project
 
-1. Inicie o Redis:
+1. **Start the Redis Worker:**
    ```
    python worker.py
    ```
 
-2. Inicie a API:
+2. **Start the API:**
    ```
    uvicorn main:app --reload
    ```
 
-## Populando o Banco de Dados
+## Populating the Database
 
-Execute os seguintes scripts nesta ordem:
+**Run the following scripts in this specific order:**
 
 1. `python scraping/get_popular_user.py`
 2. `python scraping/get_ratings.py`
 3. `python scraping/get_movies.py`
 
-Nota: Pode ser necessário exportar a tabela de ratings do banco como CSV e adicioná-la à pasta 'data'.
+Note: You may need to export the ratings table from the database as a CSV file and add it to the data folder.
 
-## Treinamento do Modelo
+## Model Training
 
-Execute os seguintes scripts nesta ordem:
+**Run the following scripts in this specific order:**
 
 1. `python model/create_training_data.py`
 2. `python model/build_model.py`
 3. `python model/run_model.py`
 
-## Parâmetros da URL
+## URL Parameters
 
-- username: Nome de usuário para quem o modelo está sendo construído
-- training_data_size: Número de linhas para a amostra do conjunto de dados de treinamento
+- **username:** The username for whom the model is being built.
+- **training_data_size:** Number of rows for the training dataset sample.
   - default: 200000
   - min: 100000
   - max: 800000
-- popularity_threshold: Limite para filtrar filmes populares (opcional)
+- **popularity_threshold:** Threshold to filter popular movies (optional).
   - default: none
   - min: -1
   - max: 7
-- num_items:
+- **num_items:**
   - default: 30
 
-## Endpoints da API
+## API Endpoints
 
-Após iniciar a API, use os seguintes endpoints para obter recomendações:
+After starting the API, use the following endpoints to get recommendations:
 
-1. GET RECS (modifique os parâmetros de consulta conforme necessário):
+1. **GET RECS** (Modify query parameters as needed):
    ```
    http://127.0.0.1:8000/get_recs?username={username}&training_data_size={size}&popularity_filter={filter}&data_opt_in={bool}
    ```
 
-2. GET RESULTS (o Redis armazena os resultados por 30 segundos, use os IDs retornados na resposta do get_recs):
+2. **GET RESULTS** (Redis stores results for 30 seconds; use the IDs returned in the get_recs response):
    ```
    http://127.0.0.1:8000/results?redis_build_model_job_id={model}&redis_get_user_data_job_id={user}
    ```
+
+## ⚠️ LEGAL NOTICE & PROPRIETARY RIGHTS
+
+This is a unique, proprietary project protected by patent laws.
+
+Access, use, reproduction, or distribution of this software by third parties is strictly prohibited. This code is for the exclusive use of the copyright holder and is not open source.
